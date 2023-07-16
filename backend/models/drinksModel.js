@@ -17,6 +17,10 @@ const drinksSchema = new Schema({
     type: Number,
     default: 0.75,
   },
+  owner: {
+    type: Schema.Types.ObjectId,
+    ref: "users",
+  },
 });
 
 module.exports = model("drinks", drinksSchema);

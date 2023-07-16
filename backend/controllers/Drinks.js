@@ -5,12 +5,13 @@ const { isValidObjectId } = require("mongoose");
 class Drinks {
   add = asyncHandler(async (req, res) => {
     const { title, price } = req.body;
+    const { id } = req.user;
 
     if (!title || !price) {
       res.status(401);
       throw new Error("error. provide all required fields");
     }
-    const drink = await drinksModel.create({ ...req.body });
+    const drink = await drinksModel.create({ ...req.body, owner: id });
     res.status(201);
     res.json({
       code: 201,
@@ -20,7 +21,9 @@ class Drinks {
   });
 
   getAll = asyncHandler(async (req, res) => {
-    const result = await drinksModel.find({});
+    const { id } = req.user;
+
+    const result = await drinksModel.find({ owner: id });
     res.status(200);
     res.json({
       code: 200,
