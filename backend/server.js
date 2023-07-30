@@ -5,6 +5,9 @@ require("colors");
 const authMiddleware = require("./middlewares/authMiddleware");
 const bcrypt = require("bcryptjs");
 const asyncHandler = require("express-async-handler");
+const { engine } = require("express-handlebars");
+const sendEmail = require("./services/sendEmail");
+
 const configPath = path.join(__dirname, "..", "config", ".env");
 const UserModel = require("./models/usersModel");
 const RoleModel = require("./models/rolesModel");
@@ -17,6 +20,12 @@ const rolesModel = require("./models/rolesModel");
 
 const app = express();
 
+app.use(express.static("public"));
+
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
+app.set("views", "backend/views");
+
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
@@ -24,6 +33,33 @@ app.use(express.json());
 // authentication - перевірка даних, які ввів користувач з тими даними, які зберігаються у БД
 // authorisation - перевірка прав доступа
 // logout - вихід з системи зареєстрованого користувача
+
+app.get("/", (req, res) => {
+  res.render("home");
+});
+
+app.get("/about", (req, res) => {
+  res.render("about");
+});
+
+app.get("/contact", (req, res) => {
+  res.render("contact");
+});
+
+app.post("/send", async (req, res) => {
+  // res.send(req.body);
+  try {
+    res.render("send", {
+      message: "Contact sent success",
+      user: req.body.userName,
+      email: req.body.userEmail,
+    });
+    await sendEmail(req.body);
+  } catch (error) {
+    res.status(400);
+    res.json({ code: 400, message: error.message });
+  }
+});
 
 app.post(
   "/register",
